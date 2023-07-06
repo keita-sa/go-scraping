@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -32,13 +34,31 @@ func main() {
 		panic(err)
 	}
 
-	err = createLatestItems(items, db)
+	err = createLatestItems(indexItems, db)
 	if err != nil {
 		panic(err)
 	}
 
 	err = updateItemMaster(db)
 	if err != nil {
+		panic(err)
+	}
+
+	var updateChkItems []ItemMaster
+	updateChkItems, err = findItemMaster(db)
+	if err != nil {
+		panic(err)
+	}
+
+	var updatedItems []ItemMaster
+	currentDir, _ := os.Getwd()
+	downloadBasePath := filepath.Join(currentDir, "work", "downloadFiles")
+	updatedItems, err = fetchDetails(updateChkItems, downloadBasePath)
+	if err != nil {
+		panic(err)
+	}
+
+	if err = createDetails(updatedItems, db); err != nil {
 		panic(err)
 	}
 }

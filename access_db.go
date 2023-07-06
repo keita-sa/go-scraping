@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"time"
 )
 
 func createLatestItems(items []Item, db *gorm.DB) error {
@@ -37,8 +38,9 @@ func updateItemMaster(db *gorm.DB) error {
 		}
 
 		var insertRecords []ItemMaster
+		initDate := time.Date(1900, 1, 1, 0, 0, 0, 0, time.Local)
 		for _, newItem := range newItems {
-			insertRecords = append(insertRecords, ItemMaster{Item: newItem.Item})
+			insertRecords = append(insertRecords, ItemMaster{Item: newItem.Item, ImageLastModifiedAt: initDate, PdfLastModifiedAt: initDate})
 			fmt.Printf("Index item is created: %s\n", newItem.URL)
 		}
 		if err := tx.CreateInBatches(insertRecords, 100).Error; err != nil {
@@ -78,4 +80,32 @@ func updateItemMaster(db *gorm.DB) error {
 
 		return nil
 	})
+}
+
+func findItemMaster(db *gorm.DB) ([]ItemMaster, error) {
+	var items []ItemMaster
+	// Findは活のレコードのみ取得する
+	// https://gorm.io/ja_JP/docs/delete.html#%E8%AB%96%E7%90%86%E5%89%8A%E9%99%A4
+	if err := db.Find(&items).Error; err != nil {
+		return nil, fmt.Errorf("select error: %w", err)
+	}
+
+	return items, nil
+}
+
+func createDetails(items []ItemMaster, db *gorm.DB) error {
+	for _, item := range items {
+		if err := db.Model(&item).Updates(ItemMaster{
+			Description:         item.Description,
+			ImageURL:            item.ImageURL,
+			ImageLastModifiedAt: item.ImageLastModifiedAt,
+			ImageDownloadPath:   item.ImageDownloadPath,
+			PdfURL:              item.PdfURL,
+			PdfLastModifiedAt:   item.PdfLastModifiedAt,
+			PdfDownloadPath:     item.PdfDownloadPath}).Error; err != nil {
+			return fmt.Errorf("update item detail info error: %w", err)
+		}
+		fmt.Printf("Detail page is updated: %s\n", item.URL)
+	}
+	return nil
 }
