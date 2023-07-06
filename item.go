@@ -1,7 +1,27 @@
 package main
 
+import (
+	"gorm.io/gorm"
+	"time"
+)
+
 type Item struct {
-	Name  string
+	Name  string `gorm:"type:varchar(100);not null"`
 	Price int
-	URL   string
+	URL   string `gorm:"type:varchar(100);uniqueIndex"`
+}
+
+type LatestItem struct {
+	Item
+	CreatedAt time.Time
+}
+
+type ItemMaster struct {
+	gorm.Model
+	Item
+}
+
+// テーブル名がitem_mastersになるのを防ぐため
+func (ItemMaster) TableName() string {
+	return "item_master"
 }
