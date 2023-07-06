@@ -1,15 +1,16 @@
 package main
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-)
+import "fmt"
 
 func main() {
+	conf, err := loadConfig()
+	if err != nil {
+		panic(err)
+	}
 
-	baseURL := "http://localhost:8000"
-	resp, err := fetch(baseURL)
+	// baseURLの宣言を削除
+	// baseURL := "http://localhost:8000"
+	resp, err := fetch(conf.BaseURL)
 	if err != nil {
 		panic(err)
 	}
@@ -24,12 +25,17 @@ func main() {
 	}
 
 	// _ をdbに変更
-	db, err := connectDB()
+	db, err := connectDB(conf)
 	if err != nil {
 		panic(err)
 	}
 
 	err = migrateDB(db)
+	if err != nil {
+		panic(err)
+	}
+
+	indexItems, err = fetchMultiPages(conf.BaseURL)
 	if err != nil {
 		panic(err)
 	}
@@ -51,9 +57,11 @@ func main() {
 	}
 
 	var updatedItems []ItemMaster
-	currentDir, _ := os.Getwd()
-	downloadBasePath := filepath.Join(currentDir, "work", "downloadFiles")
-	updatedItems, err = fetchDetails(updateChkItems, downloadBasePath)
+	// currentDirとdownloadBasePathの宣言を削除
+	// currentDir, _ := os.Getwd()
+	// downloadBasePath := filepath.Join(currentDir, "work", "downloadFiles")
+	// 引数でconf.DownloadBasePathを与えるように変更
+	updatedItems, err = fetchDetails(updateChkItems, conf.DownloadBasePath)
 	if err != nil {
 		panic(err)
 	}

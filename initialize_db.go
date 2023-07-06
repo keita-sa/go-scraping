@@ -6,12 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func connectDB() (*gorm.DB, error) {
-	dbHost := "localhost"
-	dbPort := "3306"
-	dbName := "go_scraping_dev"
-	dbUser := "go-scraping-user"
-	dbPassword := "04ec048k"
+func connectDB(conf *Config) (*gorm.DB, error) {
+	var dbHost = conf.Db.Host
+	var dbPort = conf.Db.Port
+	var dbName = conf.Db.DbName
+	var dbUser = conf.Db.User
+	var dbPassword = conf.Db.Password
 
 	// URLとデータベースの環境変数を分離するため、fmt.Sprintfを使用
 	dsn := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPassword, dbHost, dbPort, dbName)
