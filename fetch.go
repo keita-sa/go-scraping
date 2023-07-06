@@ -55,6 +55,7 @@ func fetchMultiPages(baseURL string) (items []Item, err error) {
 
 func fetchDetails(items []ItemMaster, downloadBasePath string) ([]ItemMaster, error) {
 	var updatedItems []ItemMaster
+
 	for _, item := range items {
 		resp, err := fetch(item.URL)
 		if err != nil {
@@ -80,10 +81,13 @@ func checkFileUpdated(fileURL string, lastModified time.Time) (isUpdated bool, c
 	getLastModified := func(fileURL string) (time.Time, error) {
 		res, err := http.Head(fileURL)
 		if err != nil {
-			return time.Unix(0, 0), err
+			return time.Time{}, fmt.Errorf("http head request error: %w", err)
 		}
 		lastModified, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", res.Header.Get("Last-Modified"))
-		return lastModified, err
+		if err != nil {
+			return time.Time{}, fmt.Errorf("get last-modified attribute error: %w", err)
+		}
+		return lastModified, nil
 	}
 
 	currentLastModified, err := getLastModified(fileURL)

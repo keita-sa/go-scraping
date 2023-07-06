@@ -24,7 +24,7 @@ type Config struct {
 func loadConfig() (*Config, error) {
 	var conf Config
 
-	_, err := os.Stat(filepath.Join(".", "conf", "config-loacl.yml"))
+	_, err := os.Stat(filepath.Join(".", "conf", "config-local.yml"))
 	if err == nil {
 		viper.SetConfigName("config-local")
 	} else {
