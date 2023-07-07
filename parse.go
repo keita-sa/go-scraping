@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-func parseList(resp *http.Response) ([]Item, error) {
+func parseList(response *http.Response) ([]Item, error) {
 	// レスポンスボディを取得
-	body := resp.Body
+	body := response.Body
 
 	// レスポンスに含まれているリクエスト情報からリクエスト先のURLを取得
-	requestURL := *resp.Request.URL
+	requestURL := *response.Request.URL
 
 	var items []Item
 
@@ -63,13 +63,11 @@ func parseDetail(response *http.Response, item ItemMaster, downloadBasePath stri
 
 	item.Description = doc.Find("table tr:nth-of-type(2) td:nth-of-type(2)").Text()
 
-	// 以下追加
 	// Image
 	href, exists := doc.Find("table tr:nth-of-type(1) td:nth-of-type(1) img").Attr("src")
 	refURL, parseErr := url.Parse(href)
 	if exists && parseErr == nil {
 		imageURL := (*requestURL.ResolveReference(refURL)).String()
-		// checkFileUpdated関数はこの後で実装
 		isUpdated, currentLastModified := checkFileUpdated(imageURL, item.ImageLastModifiedAt)
 		if isUpdated {
 			item.ImageURL = imageURL
@@ -89,7 +87,6 @@ func parseDetail(response *http.Response, item ItemMaster, downloadBasePath stri
 	refURL, parseErr = url.Parse(href)
 	if exists && parseErr == nil {
 		pdfURL := (*requestURL.ResolveReference(refURL)).String()
-		// checkFileUpdated関数はこの後で実装
 		isUpdated, currentLastModified := checkFileUpdated(pdfURL, item.PdfLastModifiedAt)
 		if isUpdated {
 			item.PdfURL = pdfURL
@@ -103,5 +100,6 @@ func parseDetail(response *http.Response, item ItemMaster, downloadBasePath stri
 			item.PdfDownloadPath = pdfDownloadPath
 		}
 	}
+
 	return item, nil
 }

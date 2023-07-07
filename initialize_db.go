@@ -24,8 +24,8 @@ func connectDB(conf *Config) (*gorm.DB, error) {
 }
 
 func migrateDB(db *gorm.DB) error {
-	// item_masterテーブル、latest_itemテーブルが作成される
-	if err := db.AutoMigrate(&ItemMaster{}, &LatestItem{}); err != nil {
+	// item_masterテーブル、latest_itemテーブル、historical_itemsテーブルが作成される
+	if err := db.AutoMigrate(&ItemMaster{}, &LatestItem{}, &HistoricalItem{}); err != nil {
 		return fmt.Errorf("db migration error: %w", err)
 	}
 	return nil

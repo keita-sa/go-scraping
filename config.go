@@ -24,16 +24,14 @@ type Config struct {
 func loadConfig() (*Config, error) {
 	var conf Config
 
-	_, err := os.Stat(filepath.Join(".", "conf", "config-local.yml"))
+	_, err := os.Stat(filepath.Join(".", "conf", "config.yml"))
 	if err == nil {
-		viper.SetConfigName("config-local")
-	} else {
 		viper.SetConfigName("config")
 	}
 	viper.SetConfigType("yml")
 	viper.AddConfigPath(filepath.Join(".", "conf"))
 
-	// viperでファイルから設定を読みこんだ
+	// viperでファイルから設定を読みこむ
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("read config file error: %w", err)
 	}

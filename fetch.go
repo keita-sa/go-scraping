@@ -9,11 +9,11 @@ import (
 )
 
 func fetch(url string) (*http.Response, error) {
-	resp, err := http.Get(url)
+	response, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("http get request error: %w", err)
 	}
-	return resp, nil
+	return response, nil
 }
 
 func fetchMultiPages(baseURL string) (items []Item, err error) {
@@ -33,7 +33,7 @@ func fetchMultiPages(baseURL string) (items []Item, err error) {
 		q := u.Query()
 		// pageキーの値を上書き設定
 		q.Set("page", strconv.Itoa(page))
-		// 加工したクエリリストリングを再設定
+		// 加工したクエリストリングを再設定
 		u.RawQuery = q.Encode()
 		// 設定したページの一覧の取得とパース
 		response, _ := fetch(u.String())
@@ -57,13 +57,12 @@ func fetchDetails(items []ItemMaster, downloadBasePath string) ([]ItemMaster, er
 	var updatedItems []ItemMaster
 
 	for _, item := range items {
-		resp, err := fetch(item.URL)
+		response, err := fetch(item.URL)
 		if err != nil {
 			return nil, fmt.Errorf("fetch detail page body error: %w", err)
 		}
 
-		// parseDetail関数はこの後で実装
-		currentItem, err := parseDetail(resp, item, downloadBasePath)
+		currentItem, err := parseDetail(response, item, downloadBasePath)
 		if err != nil {
 			return nil, fmt.Errorf("fetch detail page content error: %w", err)
 		}
@@ -76,7 +75,6 @@ func fetchDetails(items []ItemMaster, downloadBasePath string) ([]ItemMaster, er
 	return updatedItems, nil
 }
 
-// ファイル末尾に追加
 func checkFileUpdated(fileURL string, lastModified time.Time) (isUpdated bool, currentLastModified time.Time) {
 	getLastModified := func(fileURL string) (time.Time, error) {
 		res, err := http.Head(fileURL)

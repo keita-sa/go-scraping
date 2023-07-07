@@ -1,9 +1,10 @@
 package main
 
 import (
-	"gorm.io/gorm"
 	"path/filepath"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Item struct {
@@ -50,4 +51,9 @@ func (i ItemMaster) equals(target ItemMaster) bool {
 		i.PdfURL == target.PdfURL &&
 		i.PdfLastModifiedAt == target.PdfLastModifiedAt &&
 		i.PdfDownloadPath == target.PdfDownloadPath
+}
+
+type HistoricalItem struct {
+	Item
+	CreatedAt time.Time
 }

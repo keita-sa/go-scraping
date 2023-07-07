@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func createLatestItems(items []Item, db *gorm.DB) error {
 	stmt := &gorm.Statement{DB: db}
-	err := stmt.Parse(&LatestItem{})
-	if err != nil {
+	if err := stmt.Parse(&LatestItem{}); err != nil {
 		return fmt.Errorf("get latest_items table name error: %w", err)
 	}
 	if err := db.Exec("TRUNCATE " + stmt.Schema.Table).Error; err != nil {
@@ -22,6 +22,15 @@ func createLatestItems(items []Item, db *gorm.DB) error {
 	}
 	if err := db.CreateInBatches(insertRecords, 100).Error; err != nil {
 		return fmt.Errorf("bulk insert to latest_items error: %w", err)
+	}
+
+	// historical_itemsテーブルへのデータ挿入
+	var insertRecords4History []HistoricalItem
+	for _, item := range items {
+		insertRecords4History = append(insertRecords4History, HistoricalItem{Item: item})
+	}
+	if err := db.CreateInBatches(insertRecords4History, 100).Error; err != nil {
+		return fmt.Errorf("bulk insert to historical_items error: %w", err)
 	}
 
 	return nil
@@ -84,8 +93,6 @@ func updateItemMaster(db *gorm.DB) error {
 
 func findItemMaster(db *gorm.DB) ([]ItemMaster, error) {
 	var items []ItemMaster
-	// Findは活のレコードのみ取得する
-	// https://gorm.io/ja_JP/docs/delete.html#%E8%AB%96%E7%90%86%E5%89%8A%E9%99%A4
 	if err := db.Find(&items).Error; err != nil {
 		return nil, fmt.Errorf("select error: %w", err)
 	}
